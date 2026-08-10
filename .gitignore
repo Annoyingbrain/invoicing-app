@@ -1,0 +1,21 @@
+# Sensitive / local data — never commit real invoice or customer data
+invoices.db
+invoices/
+draft.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Build artifacts
+build/
+dist/
+*.exe
+
+# IDE
+.idea/
+.claude/settings.local.json
+
+# Misc
+Invoice

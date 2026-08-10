@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoicing App</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app-header">
+  <header class="topbar">
+    <div class="topbar-title">
+      <span class="logo-emoji">🧾</span>
+      <span id="companyNameLabel">Invoicing App</span>
+    </div>
+    <div class="topbar-db">
+      <span id="dbFileLabel" class="db-filename">No database loaded</span>
+      <span id="dbDirtyDot" class="dirty-dot" hidden title="Unsaved changes"></span>
+      <button id="btnNewDb" class="btn btn-secondary">New Database</button>
+      <button id="btnLoadDb" class="btn btn-secondary">Load Database</button>
+      <input type="file" id="fileInput" accept=".db,.sqlite,.sqlite3" hidden>
+      <button id="btnSaveDbAs" class="btn btn-secondary">Save As…</button>
+      <button id="btnSaveDb" class="btn btn-primary">Save Database</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn active" data-tab="invoice">New Invoice</button>
+    <button class="tab-btn" data-tab="invoices">Invoices</button>
+    <button class="tab-btn" data-tab="customers">Customers</button>
+    <button class="tab-btn" data-tab="catalog">Item Catalog</button>
+    <button class="tab-btn" data-tab="earnings">Earnings</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </nav>
+</div>
+
+<main id="app">
+
+  <!-- ───────── Dashboard ───────── -->
+  <section id="tab-dashboard" class="tab-panel">
+    <div class="stat-grid">
+      <div class="card stat-card">
+        <h3>This Month</h3>
+        <div class="stat-value" id="statThisMonth">—</div>
+      </div>
+      <div class="card stat-card">
+        <h3>Outstanding</h3>
+        <div class="stat-value stat-warning" id="statOutstanding">—</div>
+      </div>
+      <div class="card stat-card">
+        <h3>Overdue</h3>
+        <div class="stat-value stat-danger" id="statOverdue">—</div>
+      </div>
+      <div class="card stat-card">
+        <h3>All Time</h3>
+        <div class="stat-value" id="statAllTime">—</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Quick Start</h2>
+      <p class="hint" style="margin-bottom:14px">Jump straight into creating an invoice, or browse what's already saved.</p>
+      <div class="row">
+        <button class="btn btn-primary" data-goto-tab="invoice">+ New Invoice</button>
+        <button class="btn btn-secondary" data-goto-tab="invoices">View All Invoices</button>
+        <button class="btn btn-secondary" data-goto-tab="earnings">Earnings Report</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── New Invoice ───────── -->
+  <section id="tab-invoice" class="tab-panel active">
+    <div class="grid-2col">
+      <div class="card">
+        <h2>Customer</h2>
+        <label>Search / select customer</label>
+        <input type="text" id="customerSearch" placeholder="Type to search...">
+        <select id="customerSelect" size="5"></select>
+        <div class="row">
+          <button id="btnUseCustomer" class="btn btn-secondary">Use Selected</button>
+          <button id="btnNewCustomerToggle" class="btn btn-secondary">+ New Customer</button>
+        </div>
+        <div id="newCustomerForm" class="subform" hidden>
+          <input type="text" id="ncName" placeholder="Customer name *">
+          <input type="text" id="ncTrn" placeholder="TRN">
+          <input type="email" id="ncEmail" placeholder="Email">
+          <input type="text" id="ncPhone" placeholder="Phone">
+          <input type="text" id="ncAddress" placeholder="Address">
+          <button id="btnSaveNewCustomer" class="btn btn-primary">Save Customer</button>
+        </div>
+        <div id="selectedCustomerBox" class="selected-box" hidden></div>
+      </div>
+
+      <div class="card">
+        <h2>Invoice Details</h2>
+        <label>Project name (optional)</label>
+        <input type="text" id="projectName">
+        <div class="row">
+          <div>
+            <label>Issued date</label>
+            <input type="date" id="issuedDate">
+          </div>
+          <div>
+            <label>Due date</label>
+            <input type="date" id="dueDate">
+          </div>
+        </div>
+        <label class="checkbox-row"><input type="checkbox" id="vatToggle"> Apply 5% VAT</label>
+        <label>Notes</label>
+        <textarea id="notesField" rows="3"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Items</h2>
+      <div class="row">
+        <select id="catalogSelect">
+          <option value="">— New item —</option>
+        </select>
+      </div>
+      <div class="item-form-grid">
+        <input type="text" id="itDesc" placeholder="Description *">
+        <input type="number" id="itQty" placeholder="Qty *" step="any" value="1">
+        <input type="number" id="itPrice" placeholder="Unit price *" step="any">
+        <input type="number" id="itDiscount" placeholder="Discount %" step="any" value="0">
+        <input type="text" id="itNote" placeholder="Note">
+        <button id="btnAddItem" class="btn btn-primary">+ Add to Invoice</button>
+      </div>
+
+      <table class="data-table" id="itemsTable">
+        <thead>
+          <tr><th>Description</th><th>Qty</th><th>Price</th><th>Disc%</th><th>Amount</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="totals-box">
+        <div><span>Subtotal</span><span id="totSubtotal">0.00</span></div>
+        <div id="rowDiscount" hidden><span>Discount</span><span id="totDiscount">0.00</span></div>
+        <div id="rowVat" hidden><span>VAT (5%)</span><span id="totVat">0.00</span></div>
+        <div class="total-line"><span>Total</span><span id="totTotal">0.00</span></div>
+      </div>
+
+      <div class="row action-row">
+        <button id="btnPreviewPdf" class="btn btn-secondary">Preview PDF</button>
+        <button id="btnSaveInvoice" class="btn btn-primary">Save Invoice &amp; Generate PDF</button>
+        <button id="btnResetInvoice" class="btn btn-secondary">New / Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── Invoices ───────── -->
+  <section id="tab-invoices" class="tab-panel">
+    <div class="card">
+      <div class="card-header-row">
+        <h2>All Invoices</h2>
+        <button id="btnExportInvoicesCsv" class="btn btn-secondary btn-small">Export CSV</button>
+      </div>
+      <table class="data-table" id="invoicesTable">
+        <thead>
+          <tr><th>Invoice</th><th>Customer</th><th>Amount</th><th>Paid</th><th>Issued</th><th>Due</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ───────── Customers ───────── -->
+  <section id="tab-customers" class="tab-panel">
+    <div class="card">
+      <h2>Customers</h2>
+      <div class="item-form-grid">
+        <input type="text" id="cName" placeholder="Name *">
+        <input type="text" id="cTrn" placeholder="TRN">
+        <input type="email" id="cEmail" placeholder="Email">
+        <input type="text" id="cPhone" placeholder="Phone">
+        <input type="text" id="cAddress" placeholder="Address">
+        <button id="btnSaveCustomer" class="btn btn-primary">Save</button>
+      </div>
+      <table class="data-table" id="customersTable">
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th>TRN</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ───────── Item Catalog ───────── -->
+  <section id="tab-catalog" class="tab-panel">
+    <div class="card">
+      <h2>Item Catalog</h2>
+      <div class="item-form-grid">
+        <input type="text" id="catDesc" placeholder="Description *">
+        <input type="number" id="catPrice" placeholder="Unit price *" step="any">
+        <input type="number" id="catDiscount" placeholder="Discount %" step="any" value="0">
+        <input type="text" id="catNote" placeholder="Note">
+        <button id="btnSaveCatalogItem" class="btn btn-primary">Save</button>
+      </div>
+      <table class="data-table" id="catalogTable">
+        <thead><tr><th>Description</th><th>Price</th><th>Disc%</th><th>Note</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ───────── Earnings ───────── -->
+  <section id="tab-earnings" class="tab-panel">
+    <div class="card">
+      <h2>Earnings Report</h2>
+      <label>Date range — based on invoice issue date (DD-MM-YYYY)</label>
+      <div class="row">
+        <div>
+          <label>From</label>
+          <input type="date" id="earningsFrom">
+        </div>
+        <div>
+          <label>To</label>
+          <input type="date" id="earningsTo">
+        </div>
+        <button id="btnCalculateEarnings" class="btn btn-primary">Calculate</button>
+      </div>
+
+      <div class="earnings-summary" id="earningsSummary" hidden>
+        <div><span>Invoices in range</span><span id="earnCount">0</span></div>
+        <div><span>Total invoiced</span><span id="earnTotal">0.00</span></div>
+        <div><span>Paid</span><span id="earnPaid">0.00</span></div>
+        <div><span>Unpaid</span><span id="earnUnpaid">0.00</span></div>
+      </div>
+
+      <table class="data-table" id="earningsTable" hidden>
+        <thead><tr><th>Invoice</th><th>Customer</th><th>Issued</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="row action-row" id="earningsExportRow" hidden>
+        <button id="btnExportEarningsPdf" class="btn btn-secondary">Export PDF</button>
+        <button id="btnExportEarningsCsv" class="btn btn-secondary">Export CSV</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── Settings ───────── -->
+  <section id="tab-settings" class="tab-panel">
+    <div class="card">
+      <h2>Company Settings</h2>
+      <div class="settings-grid">
+        <div>
+          <h3>Company</h3>
+          <label>Company Name</label><input type="text" id="sName">
+          <label>Address</label><input type="text" id="sAddress">
+          <label>Phone</label><input type="text" id="sPhone">
+          <label>Email</label><input type="email" id="sEmail">
+          <label>TRN</label><input type="text" id="sTrn">
+        </div>
+        <div>
+          <h3>Banking</h3>
+          <label>Bank Name</label><input type="text" id="sBankName">
+          <label>Beneficiary</label><input type="text" id="sBeneficiary">
+          <label>Account Number</label><input type="text" id="sAccountNumber">
+          <label>IBAN</label><input type="text" id="sIban">
+          <label>Routing Code</label><input type="text" id="sRoutingCode">
+          <label>Swift Code</label><input type="text" id="sSwiftCode">
+          <label>Currency</label><input type="text" id="sCurrency">
+        </div>
+        <div>
+          <h3>Logo</h3>
+          <input type="file" id="sLogoFile" accept="image/png,image/jpeg">
+          <img id="sLogoPreview" class="logo-preview" hidden>
+          <button id="btnClearLogo" class="btn btn-secondary">Remove Logo</button>
+          <p class="hint">Shown in the top-left corner of generated PDFs.</p>
+        </div>
+      </div>
+      <button id="btnSaveSettings" class="btn btn-primary">Save Settings</button>
+    </div>
+  </section>
+
+</main>
+
+<div id="toast" class="toast" hidden></div>
+
+<div id="modalOverlay" class="modal-overlay" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <button id="modalClose" class="modal-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="lib/sql-wasm.js"></script>
+<script src="lib/jspdf.umd.min.js"></script>
+<script src="js/db.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
