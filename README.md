@@ -3,6 +3,8 @@
 ## Browser Version
 
 A fully client-side browser edition now lives in [`docs/`](docs/) — no install, no server, no account. It runs entirely in your browser using [sql.js](https://sql.js.org) (SQLite compiled to WebAssembly), so your database stays a local `.db` file on your computer that you explicitly load and save; nothing is ever uploaded anywhere.
+Repo: https://github.com/Annoyingbrain/invoicing-app (public)
+App: https://annoyingbrain.github.io/invoicing-app/ — works from any browser, any device, no install
 
 - **Try it locally:** `cd docs && python3 -m http.server 8000`, then open `http://localhost:8000`.
 - **Load your existing data:** click **Load Database** and pick your `invoices.db` — the schema is fully compatible with the desktop app's database.
